@@ -71,10 +71,10 @@ class Solver:
             frontierElem = frontier.pop(0)
             node = frontierElem[1]
 
+            explored.append(node.state)
+
             if problem.isGoalState(node.state):
                 return Solver.SuccessMessage(node, explored)
-
-            explored.append(node.state)
 
             for nextState in problem.nextStatesFrom(node.state):
                 newPriority: Priority = frontierElem[0] + 1
@@ -84,6 +84,7 @@ class Solver:
 
                 if childNode.state not in explored and childNode not in frontier:
                     frontier.append(childElem)
+
                 elif childElem in frontier:
                     idx: int = frontier.index(childElem)
 
@@ -103,7 +104,7 @@ class Solver:
     def DLS(problem: Problem, depthLimit: int = 0):
         pass
 
-    # TODO: check
+    # wrong explored at 11, 15?
     @staticmethod
     def GBFS(problem: Problem):
         frontier: Frontier = []
@@ -123,9 +124,6 @@ class Solver:
             frontierElem = frontier.pop(0)
             node = frontierElem[1]
 
-            if problem.isGoalState(node.state):
-                return Solver.SuccessMessage(node, explored)
-
             explored.append(node.state)
 
             for nextState in problem.nextStatesFrom(node.state):
@@ -133,9 +131,13 @@ class Solver:
 
                 childElem = Solver.createNewPQElem(nextState, node, newPriority)
                 childNode = childElem[1]
+                
+                if problem.isGoalState(childNode.state):
+                    return Solver.SuccessMessage(childNode, explored)
 
                 if childNode.state not in explored and childNode not in frontier:
                     frontier.append(childElem)
+
                 elif childElem in frontier:
                     idx: int = frontier.index(childElem)
 
@@ -158,7 +160,7 @@ class Solver:
     def SuccessMessage(finalNode: Node, explored: ExploredStates) -> None:
         duration: int = len(explored)
 
-        timeInfo: str = f"Time elapsed:\n\t{duration} minutes"
+        timeInfo: str = f"Time elapsed:\n\t{duration} minute(s)"
         exploredInfo: str = f"Explored states:\n\t{explored}"
         pathInfo: str = "Path:\n"
 
@@ -177,7 +179,7 @@ class Solver:
     def FailedMessage(explored: ExploredStates) -> None:
         duration: int = len(explored)
 
-        timeInfo: str = f"Time elapsed:\n\t{duration} minutes"
+        timeInfo: str = f"Time elapsed:\n\t{duration} minute(s)"
         exploredInfo: str = f"Explored states:\n\t{explored}"
 
         print("\n".join(["Failed", timeInfo, exploredInfo]))
