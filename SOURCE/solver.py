@@ -1,15 +1,6 @@
 from typing import List, Optional
-from heapq import heappush, heappop
-from time import perf_counter
 
 from model import *
-
-
-# TODO:
-#   Node <- (state, parentNode)
-#   PQ <- (Piority, Node)
-#   Priority <- Cost | Heuristic | Cost + Heuristic
-
 
 
 def readInputFromFile(fileDir: str) -> Problem:
@@ -47,55 +38,60 @@ def readInput(input: ProblemInput) -> Problem:
     return Problem(size, adjMatrix, goalState)
 
 
-# TODO: heuristic <- F(current, goal, size)
-def ManhattanHeuristic(ori: State, des: State, size: int) -> Heuristic:
+def ManhattanHeuristic(ori: State, problem: Problem) -> Heuristic:
+    des: State = problem.goalState
+    size: int = problem.size
+
     if ori >= size * size or des >= size * size:
         raise IndexError
+
     x: Heuristic = des % size - ori % size
     y: Heuristic = des // size - ori // size
+
     return x + y
 
 
 class Solver:
     @staticmethod
     def UCS(problem: Problem) -> None:
-        start: float = perf_counter()
-        duration: float = float()
-
         frontier: Frontier = []
         explored: ExploredStates = []
 
         node: Node = Node(problem.initState)
+        frontierElem: FrontierElem = (0, node)
 
         if problem.isGoalState(node.state):
-            duration = perf_counter() - start
-            return Solver.SuccessMessage(node, [node.state], duration)
+            return Solver.SuccessMessage(node, [node.state])
 
-        frontier.append(node)
+        frontier.append(frontierElem)
 
         while frontier:
             frontier.sort()
-            node = frontier.pop(0)
+
+            frontierElem = frontier.pop(0)
+            node = frontierElem[1]
 
             if problem.isGoalState(node.state):
-                duration = perf_counter() - start
-                return Solver.SuccessMessage(node, explored, duration)
+                return Solver.SuccessMessage(node, explored)
 
             explored.append(node.state)
 
             for nextState in problem.nextStatesFrom(node.state):
-                child = Solver.createNewNode(nextState, node)
+                newPriority: Priority = frontierElem[0] + 1
 
-                if child.state not in explored and child not in frontier:
-                    frontier.append(child)
-                elif child in frontier:
-                    idx: int = frontier.index(child)
-                    if child.cost < frontier[idx].cost:
-                        frontier.remove(child)
-                        frontier.append(child)
+                childElem = Solver.createNewPQElem(nextState, node, newPriority)
+                childNode = childElem[1]
 
-        duration = perf_counter() - start
-        Solver.FailedMessage(explored, duration)
+                if childNode.state not in explored and childNode not in frontier:
+                    frontier.append(childElem)
+                elif childElem in frontier:
+                    idx: int = frontier.index(childElem)
+
+                    if childElem[0] < frontier[idx][0]:
+                        frontier.remove(childElem)
+                        frontier.append(childElem)
+
+        Solver.FailedMessage(explored)
 
     # TODO: implement how
     @staticmethod
@@ -110,70 +106,59 @@ class Solver:
     # TODO: check
     @staticmethod
     def GBFS(problem: Problem):
-        start: float = perf_counter()
-        duration: float = float()
-
-        frontier: FrontierPQ = []
+        frontier: Frontier = []
         explored: ExploredStates = []
 
-        pqNode: PQNode = (0, Node(problem.initState))
-        node: Node = pqNode[1]
+        node: Node = Node(problem.initState)
+        frontierElem: FrontierElem = (0, node)
 
         if problem.isGoalState(node.state):
-            duration = perf_counter() - start
-            return Solver.SuccessMessage(node, [node.state], duration)
+            return Solver.SuccessMessage(node, [node.state])
 
-        frontier.append(pqNode)
+        frontier.append(frontierElem)
 
         while frontier:
             frontier.sort()
-            pqNode = frontier.pop(0)
-            node = pqNode[1]
+
+            frontierElem = frontier.pop(0)
+            node = frontierElem[1]
 
             if problem.isGoalState(node.state):
-                duration = perf_counter() - start
-                return Solver.SuccessMessage(node, explored, duration)
+                return Solver.SuccessMessage(node, explored)
 
             explored.append(node.state)
 
             for nextState in problem.nextStatesFrom(node.state):
-                pqChild = Solver.createNewPQNode(
-                    nextState, node, ManhattanHeuristic(node.state, nextState, problem.size)
-                )
-                child = pqChild[1]
+                newPriority: Priority = ManhattanHeuristic(nextState, problem)
 
-                if child.state not in explored and child not in frontier:
-                    frontier.append(pqChild)
-                elif pqChild in frontier:
-                    idx: int = frontier.index(pqChild)
-                    if pqChild[0] < frontier[idx][0]:
-                        frontier.remove(pqChild)
-                        frontier.append(pqChild)
+                childElem = Solver.createNewPQElem(nextState, node, newPriority)
+                childNode = childElem[1]
 
-        duration = perf_counter() - start
-        Solver.FailedMessage(explored, duration)
+                if childNode.state not in explored and childNode not in frontier:
+                    frontier.append(childElem)
+                elif childElem in frontier:
+                    idx: int = frontier.index(childElem)
+
+                    if childElem[0] < frontier[idx][0]:
+                        frontier.remove(childElem)
+                        frontier.append(childElem)
+
+        Solver.FailedMessage(explored)
 
     # TODO: implement
     @staticmethod
     def AStar(problem: Problem):
         pass
 
-    # TODO: implement
     @staticmethod
-    def createNewNode(state: State, parent: Node, addCost: int = 1) -> Node:
-        return Node(state, parent, parent.cost + addCost)
+    def createNewPQElem(state: State, parent: Node, priority: Priority) -> FrontierElem:
+        return (priority, Node(state, parent))
 
-    # TODO: implement
     @staticmethod
-    def createNewPQNode(state: State, parent: Node, heuristic: Heuristic) -> PQNode:
-        return (heuristic, Node(state, parent, 0))
+    def SuccessMessage(finalNode: Node, explored: ExploredStates) -> None:
+        duration: int = len(explored)
 
-    # TODO: implement
-    @staticmethod
-    def SuccessMessage(
-        finalNode: Node, explored: ExploredStates, duration: float
-    ) -> None:
-        timeInfo: str = f"Time elapsed: {duration}"
+        timeInfo: str = f"Time elapsed:\n\t{duration} minutes"
         exploredInfo: str = f"Explored states:\n\t{explored}"
         pathInfo: str = "Path:\n"
 
@@ -189,14 +174,16 @@ class Solver:
         print("\n".join([timeInfo, exploredInfo, pathInfo]))
 
     @staticmethod
-    def FailedMessage(explored: ExploredStates, duration: float) -> None:
-        timeInfo: str = "Time elapsed: {duration}"
-        exploredInfo: str = "Explored states:\n\t{explored}"
+    def FailedMessage(explored: ExploredStates) -> None:
+        duration: int = len(explored)
+
+        timeInfo: str = f"Time elapsed:\n\t{duration} minutes"
+        exploredInfo: str = f"Explored states:\n\t{explored}"
 
         print("\n".join(["Failed", timeInfo, exploredInfo]))
 
 
 if __name__ == "__main__":
     Solver.UCS(readInputFromFile("./INPUT/in1.txt"))
-    print('\n')
+    print("\n")
     Solver.GBFS(readInputFromFile("./INPUT/in1.txt"))

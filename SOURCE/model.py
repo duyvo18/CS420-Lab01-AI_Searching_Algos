@@ -3,16 +3,16 @@ from typing import Tuple, List
 
 State = int
 Coordinate = Tuple[int, int]
+
 Cost = int
 Heuristic = int
 Priority = int
 
 
 class Node(object):
-    def __init__(self, state: State, parent: "Node" = None, cost: Cost = 0) -> None:
+    def __init__(self, state: State, parent: "Node" = None) -> None:
         self.state = state
         self.parent = parent
-        self.cost = cost
 
     def __eq__(self, o: object) -> bool:
         if not isinstance(o, Node):
@@ -22,25 +22,21 @@ class Node(object):
     def __lt__(self, o: object) -> bool:
         if not isinstance(o, Node):
             return NotImplemented
-        if self.cost == o.cost:
-            return self.state < o.state
         else:
-            return self.cost < o.cost
+            return self.state < o.state
 
     def __str__(self) -> str:
-        return f"[{self.state}, {self.cost}]"
+        return f"[{self.state}]"
 
     def __repr__(self) -> str:
-        return f"[{self.state}, {self.cost}]"
+        return f"[{self.state}]"
 
 
 ProblemInput = List[str]
 AdjMatrix = List[List[State]]
 
-Frontier = List[Node]
-
-PQNode = Tuple[Priority, Node]
-FrontierPQ = List[PQNode]
+FrontierElem = Tuple[Priority, Node]
+Frontier = List[FrontierElem]
 
 ExploredStates = List[State]
 
