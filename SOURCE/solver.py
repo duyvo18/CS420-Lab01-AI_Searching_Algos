@@ -104,7 +104,7 @@ class Solver:
     def DLS(problem: Problem, depthLimit: int = 0):
         pass
 
-    # wrong explored at 11, 15?
+    # TODO: wrong explored at 11, 15?
     @staticmethod
     def GBFS(problem: Problem):
         frontier: Frontier = []
@@ -186,6 +186,6 @@ class Solver:
 
 
 if __name__ == "__main__":
-    Solver.UCS(readInputFromFile("./INPUT/in1.txt"))
+    # Solver.UCS(readInputFromFile("./INPUT/in1.txt"))
     print("\n")
     Solver.GBFS(readInputFromFile("./INPUT/in1.txt"))
