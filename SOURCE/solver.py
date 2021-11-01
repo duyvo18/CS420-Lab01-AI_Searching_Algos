@@ -5,6 +5,13 @@ from time import perf_counter
 from model import *
 
 
+# TODO:
+#   Node <- (state, parentNode)
+#   PQ <- (Piority, Node)
+#   Priority <- Cost | Heuristic | Cost + Heuristic
+
+
+
 def readInputFromFile(fileDir: str) -> Problem:
     with open(fileDir) as file:
         return readInput(file.read().splitlines())
@@ -40,16 +47,13 @@ def readInput(input: ProblemInput) -> Problem:
     return Problem(size, adjMatrix, goalState)
 
 
+# TODO: heuristic <- F(current, goal, size)
 def ManhattanHeuristic(ori: State, des: State, size: int) -> Heuristic:
-    if ori >= size * 2 or des >= size * 2:
+    if ori >= size * size or des >= size * size:
         raise IndexError
     x: Heuristic = des % size - ori % size
     y: Heuristic = des // size - ori // size
     return x + y
-
-
-def HeuristicSort():
-    pass
 
 
 class Solver:
@@ -93,21 +97,61 @@ class Solver:
         duration = perf_counter() - start
         Solver.FailedMessage(explored, duration)
 
-    # TODO: implement helps
+    # TODO: implement how
     @staticmethod
     def IDS(problem: Problem):
         pass
 
-    # TODO: implement helps
+    # TODO: implement how
     @staticmethod
     def DLS(problem: Problem, depthLimit: int = 0):
         pass
 
-    # TODO: implement
+    # TODO: check
     @staticmethod
     def GBFS(problem: Problem):
+        start: float = perf_counter()
+        duration: float = float()
 
-        pass
+        frontier: FrontierPQ = []
+        explored: ExploredStates = []
+
+        pqNode: PQNode = (0, Node(problem.initState))
+        node: Node = pqNode[1]
+
+        if problem.isGoalState(node.state):
+            duration = perf_counter() - start
+            return Solver.SuccessMessage(node, [node.state], duration)
+
+        frontier.append(pqNode)
+
+        while frontier:
+            frontier.sort()
+            pqNode = frontier.pop(0)
+            node = pqNode[1]
+
+            if problem.isGoalState(node.state):
+                duration = perf_counter() - start
+                return Solver.SuccessMessage(node, explored, duration)
+
+            explored.append(node.state)
+
+            for nextState in problem.nextStatesFrom(node.state):
+                pqChild = Solver.createNewPQNode(
+                    nextState, node, ManhattanHeuristic(node.state, nextState, problem.size)
+                )
+                child = pqChild[1]
+
+                if child.state not in explored and child not in frontier:
+                    frontier.append(pqChild)
+                elif pqChild in frontier:
+                    idx: int = frontier.index(pqChild)
+                    if pqChild[0] < frontier[idx][0]:
+                        frontier.remove(pqChild)
+                        frontier.append(pqChild)
+
+        duration = perf_counter() - start
+        Solver.FailedMessage(explored, duration)
 
     # TODO: implement
     @staticmethod
@@ -121,30 +165,38 @@ class Solver:
 
     # TODO: implement
     @staticmethod
-    def SuccessMessage(finalNode: Node, explored: ExploredStates, duration: float) -> None:
-        timeInfo: str = f'Time elapsed: {duration}'
-        exploredInfo: str = f'Explored states:\n\t{explored}'
-        pathInfo: str = 'Path:\n'
+    def createNewPQNode(state: State, parent: Node, heuristic: Heuristic) -> PQNode:
+        return (heuristic, Node(state, parent, 0))
+
+    # TODO: implement
+    @staticmethod
+    def SuccessMessage(
+        finalNode: Node, explored: ExploredStates, duration: float
+    ) -> None:
+        timeInfo: str = f"Time elapsed: {duration}"
+        exploredInfo: str = f"Explored states:\n\t{explored}"
+        pathInfo: str = "Path:\n"
 
         path = []
         tmpNode: Optional[Node] = finalNode
         while tmpNode:
             path.append(tmpNode.state)
             tmpNode = tmpNode.parent
-        
+
         path.reverse()
-        pathInfo += '\t' + path.__str__()
+        pathInfo += "\t" + path.__str__()
 
-        print('\n'.join([timeInfo, exploredInfo, pathInfo]))
-
+        print("\n".join([timeInfo, exploredInfo, pathInfo]))
 
     @staticmethod
     def FailedMessage(explored: ExploredStates, duration: float) -> None:
-        timeInfo: str = 'Time elapsed: {duration}'
-        exploredInfo: str = 'Explored states:\n\t{explored}'
+        timeInfo: str = "Time elapsed: {duration}"
+        exploredInfo: str = "Explored states:\n\t{explored}"
 
-        print('\n'.join(['Failed', timeInfo, exploredInfo]))
+        print("\n".join(["Failed", timeInfo, exploredInfo]))
 
 
 if __name__ == "__main__":
-    Solver.UCS(readInputFromFile("./19125087/INPUT/in1.txt"))
+    Solver.UCS(readInputFromFile("./INPUT/in1.txt"))
+    print('\n')
+    Solver.GBFS(readInputFromFile("./INPUT/in1.txt"))

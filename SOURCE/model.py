@@ -5,6 +5,7 @@ State = int
 Coordinate = Tuple[int, int]
 Cost = int
 Heuristic = int
+Priority = int
 
 
 class Node(object):
@@ -33,38 +34,14 @@ class Node(object):
         return f"[{self.state}, {self.cost}]"
 
 
-class HeuristicNode(object):
-    def __init__(
-        self,
-        state: State,
-        parent: "HeuristicNode" = None,
-        cost: Cost = 0,
-        heuristic: Heuristic = 0,
-    ) -> None:
-        self.state = state
-        self.parent = parent
-        self.cost = cost
-        self.heuristic = heuristic
-
-    def __eq__(self, o: object) -> bool:
-        if not isinstance(o, Node):
-            return NotImplemented
-        return self.state == o.state
-
-    def __str__(self) -> str:
-        return f"[{self.state}, {self.cost}]"
-
-    def __repr__(self) -> str:
-        return f"[{self.state}, {self.cost}]"
-
-
 ProblemInput = List[str]
 AdjMatrix = List[List[State]]
 
 Frontier = List[Node]
 
-FrontierPQElem = Tuple[Heuristic, Node]
-FrontierPQ = List[FrontierPQElem]
+PQNode = Tuple[Priority, Node]
+FrontierPQ = List[PQNode]
+
 ExploredStates = List[State]
 
 
