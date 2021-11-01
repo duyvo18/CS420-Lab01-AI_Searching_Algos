@@ -1,0 +1,2 @@
+https://github.com/navdeep-G/samplemod
+https://github.com/fakemonk1/AI-Search-Algorithms-Implementations

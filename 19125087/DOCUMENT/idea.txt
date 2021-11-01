@@ -1,0 +1,34 @@
+State: int
+Coordinate: Tuple[int, int]
+Cost: int
+Heuristic: int
+
+Node(State, Cost)
+
+ProblemInput: List[str]
+AdjMatrix: List[List[int]]
+
+Frontier: List[Node]
+FrontierPQ: List[Tuple[Heuristic, Node]]
+
+Problem(AdjMatrix, State, State = 0)
+    isGoal(State) -> bool
+    nextStates(State) -> List[State]
+
+Solver
+    UCS
+        node = init
+        if node is goal 
+        node -> frontierpq 
+        while frontier 
+            node <- frontier pop 
+            if node is goal 
+                success 
+            for state in legal 
+                child <- state 
+                if child not in 
+
+readInput(ProblemInput) -> Problem?
+
+ManhattanHeuristic(State, State, Size) -> Heuristic
+
