@@ -10,9 +10,10 @@ Priority = int
 
 
 class Node(object):
-    def __init__(self, state: State, parent: "Node" = None) -> None:
+    def __init__(self, state: State, parent: "Node" = None, cost: Cost = 0) -> None:
         self.state = state
         self.parent = parent
+        self.cost = cost
 
     def __eq__(self, o: object) -> bool:
         if not isinstance(o, Node):
