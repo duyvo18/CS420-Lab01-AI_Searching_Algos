@@ -51,6 +51,7 @@ def ManhattanHeuristic(problem: Problem, ori: State) -> Heuristic:
     return x + y
 
 
+# TODO: Problem: check Node in Frontier return true iff Node and Priority == 
 class Solver:
     @staticmethod
     def UCS(problem: Problem) -> None:
@@ -82,7 +83,7 @@ class Solver:
                 childElem = Solver.createNewPQElem(nextState, node, newPriority)
                 childNode = childElem[1]
 
-                if childNode.state not in explored and childNode not in frontier:
+                if childNode.state not in explored and childNode not in [elem[1] for elem in frontier]:
                     frontier.append(childElem)
 
                 elif childElem in frontier:
@@ -99,7 +100,7 @@ class Solver:
     def IDS(problem: Problem):
         pass
 
-    # TODO: implement how
+    # TODO: use Node.cost for depth
     @staticmethod
     def DLS(problem: Problem, depthLimit: int = 0):
         pass
@@ -135,7 +136,7 @@ class Solver:
                 if problem.isGoalState(childNode.state):
                     return Solver.SuccessMessage(childNode, explored)
 
-                if childNode.state not in explored and childNode not in frontier:
+                if childNode.state not in explored and childNode not in [elem[1] for elem in frontier]:
                     frontier.append(childElem)
 
                 elif childElem in frontier:
@@ -147,7 +148,7 @@ class Solver:
 
         Solver.FailedMessage(explored)
 
-    # TODO: implement
+    # TODO: debug?
     @staticmethod
     def AStar(problem: Problem):
         frontier: Frontier = []
@@ -178,7 +179,7 @@ class Solver:
                 childElem = Solver.createNewPQElem(nextState, node, newPriority, node.cost + 1)
                 childNode = childElem[1]
 
-                if childNode.state not in explored and childNode not in frontier:
+                if childNode.state not in explored and childNode not in [elem[1] for elem in frontier]:
                     frontier.append(childElem)
 
                 elif childElem in frontier:
