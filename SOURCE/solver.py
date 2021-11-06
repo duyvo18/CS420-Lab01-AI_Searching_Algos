@@ -45,24 +45,24 @@ def ManhattanHeuristic(problem: Problem, ori: State) -> Heuristic:
     if ori >= size * size or des >= size * size:
         raise IndexError
 
-    x: Heuristic = des % size - ori % size
-    y: Heuristic = des // size - ori // size
+    delX: Heuristic = abs(des // size - ori // size)
+    delY: Heuristic = abs(des % size - ori % size)
 
-    return x + y
+    return delX + delY
 
 
-# TODO: Problem: check Node in Frontier return true iff Node and Priority == 
 class Solver:
     @staticmethod
     def UCS(problem: Problem) -> None:
-        frontier: Frontier = []
-        explored: ExploredStates = []
-
         node: Node = Node(problem.initState)
-        frontierElem: FrontierElem = (0, node)
 
         if problem.isGoalState(node.state):
             return Solver.SuccessMessage(node, [node.state])
+
+        frontier: Frontier = []
+        explored: ExploredStates = []
+
+        frontierElem: FrontierElem = (0, node)
 
         frontier.append(frontierElem)
 
@@ -80,17 +80,22 @@ class Solver:
             for nextState in problem.nextStatesFrom(node.state):
                 newPriority: Priority = frontierElem[0] + 1
 
-                childElem = Solver.createNewPQElem(nextState, node, newPriority)
-                childNode = childElem[1]
+                childElem: FrontierElem = Solver.createNewPQElem(
+                    nextState, node, newPriority
+                )
+                childNode: Node = childElem[1]
 
-                if childNode.state not in explored and childNode not in [elem[1] for elem in frontier]:
+                if childNode.state not in explored and childNode not in [
+                    elem[1] for elem in frontier
+                ]:
                     frontier.append(childElem)
 
-                elif childElem in frontier:
-                    idx: int = frontier.index(childElem)
-
-                    if childElem[0] < frontier[idx][0]:
-                        frontier.remove(childElem)
+                for idx in range(0, len(frontier)):
+                    if (
+                        childNode == frontier[idx][1]
+                        and childElem[0] < frontier[idx][0]
+                    ):
+                        frontier.remove(frontier[idx])
                         frontier.append(childElem)
 
         Solver.FailedMessage(explored)
@@ -108,14 +113,15 @@ class Solver:
     # TODO: wrong explored at 11, 15?
     @staticmethod
     def GBFS(problem: Problem):
-        frontier: Frontier = []
-        explored: ExploredStates = []
-
         node: Node = Node(problem.initState)
-        frontierElem: FrontierElem = (0, node)
 
         if problem.isGoalState(node.state):
             return Solver.SuccessMessage(node, [node.state])
+
+        frontier: Frontier = []
+        explored: ExploredStates = []
+
+        frontierElem: FrontierElem = (0, node)
 
         frontier.append(frontierElem)
 
@@ -130,20 +136,25 @@ class Solver:
             for nextState in problem.nextStatesFrom(node.state):
                 newPriority: Priority = ManhattanHeuristic(problem, nextState)
 
-                childElem = Solver.createNewPQElem(nextState, node, newPriority)
-                childNode = childElem[1]
-                
+                childElem: FrontierElem = Solver.createNewPQElem(
+                    nextState, node, newPriority
+                )
+                childNode: Node = childElem[1]
+
                 if problem.isGoalState(childNode.state):
                     return Solver.SuccessMessage(childNode, explored)
 
-                if childNode.state not in explored and childNode not in [elem[1] for elem in frontier]:
+                if childNode.state not in explored and childNode not in [
+                    elem[1] for elem in frontier
+                ]:
                     frontier.append(childElem)
 
-                elif childElem in frontier:
-                    idx: int = frontier.index(childElem)
-
-                    if childElem[0] < frontier[idx][0]:
-                        frontier.remove(childElem)
+                for idx in range(0, len(frontier)):
+                    if (
+                        childNode == frontier[idx][1]
+                        and childElem[0] < frontier[idx][0]
+                    ):
+                        frontier.remove(frontier[idx])
                         frontier.append(childElem)
 
         Solver.FailedMessage(explored)
@@ -151,14 +162,15 @@ class Solver:
     # TODO: debug?
     @staticmethod
     def AStar(problem: Problem):
-        frontier: Frontier = []
-        explored: ExploredStates = []
-
         node: Node = Node(problem.initState)
-        frontierElem: FrontierElem = (0, node)
 
         if problem.isGoalState(node.state):
             return Solver.SuccessMessage(node, [node.state])
+
+        frontier: Frontier = []
+        explored: ExploredStates = []
+
+        frontierElem: FrontierElem = (0, node)
 
         frontier.append(frontierElem)
 
@@ -174,26 +186,33 @@ class Solver:
                 return Solver.SuccessMessage(node, explored)
 
             for nextState in problem.nextStatesFrom(node.state):
-                newPriority: Priority = node.cost + ManhattanHeuristic(problem, nextState)
+                newPriority: Priority = node.cost + ManhattanHeuristic(
+                    problem, nextState
+                )
 
-                childElem = Solver.createNewPQElem(nextState, node, newPriority, node.cost + 1)
+                childElem = Solver.createNewPQElem(nextState, node, newPriority)
                 childNode = childElem[1]
 
-                if childNode.state not in explored and childNode not in [elem[1] for elem in frontier]:
+                if childNode.state not in explored and childNode not in [
+                    elem[1] for elem in frontier
+                ]:
                     frontier.append(childElem)
 
-                elif childElem in frontier:
-                    idx: int = frontier.index(childElem)
-
-                    if childElem[0] < frontier[idx][0]:
-                        frontier.remove(childElem)
+                for idx in range(0, len(frontier)):
+                    if (
+                        childNode == frontier[idx][1]
+                        and childElem[0] < frontier[idx][0]
+                    ):
+                        frontier.remove(frontier[idx])
                         frontier.append(childElem)
 
         Solver.FailedMessage(explored)
 
     @staticmethod
-    def createNewPQElem(state: State, parent: Node, priority: Priority, addedCost: Cost = 0) -> FrontierElem:
-        return (priority, Node(state, parent, addedCost))
+    def createNewPQElem(
+        state: State, parent: Node, priority: Priority, addedCost: Cost = 1
+    ) -> FrontierElem:
+        return (priority, Node(state, parent, parent.cost + addedCost))
 
     @staticmethod
     def SuccessMessage(finalNode: Node, explored: ExploredStates) -> None:
