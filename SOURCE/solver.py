@@ -109,13 +109,17 @@ class Solver:
     @staticmethod
     def IDS(problem: Problem) -> str:
         upperBound: int = problem.size ** 2
+        totalExplored: List = list()
+
         for limit in range(0, upperBound + 1):
             result: Tuple[Optional[Node], ExploredStates] = Solver.DLS(problem, limit)
 
-            if isinstance(result[0], Node):
-                return Solver.SuccessMessage(result[0], result[1])
+            totalExplored.extend(result[1])
 
-        return Solver.FailedMessage(result[1])
+            if isinstance(result[0], Node):
+                return Solver.SuccessMessage(result[0], totalExplored)
+
+        return Solver.FailedMessage(totalExplored)
 
     # TODO: use Node.cost for depth
     @staticmethod
@@ -143,8 +147,7 @@ class Solver:
 
             explored.append(node.state)
 
-            nextStates: List[State] = problem.nextStatesFrom(node.state)
-            nextStates.reverse()
+            nextStates: List[State] = list(reversed(problem.nextStatesFrom(node.state)))
 
             for nextState in nextStates:
                 newCost: Cost = node.cost + 1
@@ -161,14 +164,6 @@ class Solver:
                     elem[1] for elem in frontier
                 ]:
                     frontier.append(childElem)
-
-                for idx in range(0, len(frontier)):
-                    if (
-                        childNode == frontier[idx][1]
-                        and childElem[0] < frontier[idx][0]
-                    ):
-                        frontier.remove(frontier[idx])
-                        frontier.append(childElem)
 
         return (None, explored)
 
@@ -304,7 +299,7 @@ class Solver:
         timeInfo: str = f"\nTime elapsed:\n{duration} minute(s)"
         exploredInfo: str = f"\nExplored states:\n{explored}"
 
-        return "\n\n".join(["Failed", timeInfo, exploredInfo, ""]) 
+        return "\n\n".join(["Failed", timeInfo, exploredInfo, ""])
 
 
 if __name__ == "__main__":
