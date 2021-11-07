@@ -8,6 +8,11 @@ def readInputFromFile(fileDir: str) -> Problem:
         return readInput(file.read().splitlines())
 
 
+def writeOutputToFile(fileDir: str, output: str) -> None:
+    with open(fileDir, mode="w") as file:
+        file.write(output)
+
+
 def readInput(input: ProblemInput) -> Problem:
     size: int = int()
     goalState: State = int()
@@ -53,7 +58,7 @@ def ManhattanHeuristic(problem: Problem, ori: State) -> Heuristic:
 
 class Solver:
     @staticmethod
-    def UCS(problem: Problem) -> None:
+    def UCS(problem: Problem) -> str:
         node: Node = Node(problem.initState)
 
         if problem.isGoalState(node.state):
@@ -98,23 +103,25 @@ class Solver:
                         frontier.remove(frontier[idx])
                         frontier.append(childElem)
 
-        Solver.FailedMessage(explored)
+        return Solver.FailedMessage(explored)
 
     # TODO: implement how
     @staticmethod
-    def IDS(problem: Problem):
-        upperBound: int = problem.size**2
-        # for limit in range(0, upperBound + 1):
-        result: Tuple[Optional[Node], ExploredStates] = Solver.DLS(problem, 22)
+    def IDS(problem: Problem) -> str:
+        upperBound: int = problem.size ** 2
+        for limit in range(0, upperBound + 1):
+            result: Tuple[Optional[Node], ExploredStates] = Solver.DLS(problem, limit)
 
-        if isinstance(result[0], Node):
-            return Solver.SuccessMessage(result[0], result[1])
-        
+            if isinstance(result[0], Node):
+                return Solver.SuccessMessage(result[0], result[1])
+
         return Solver.FailedMessage(result[1])
 
     # TODO: use Node.cost for depth
     @staticmethod
-    def DLS(problem: Problem, depthLimit: int = 0) -> Tuple[Optional[Node], ExploredStates]:
+    def DLS(
+        problem: Problem, depthLimit: int = 0
+    ) -> Tuple[Optional[Node], ExploredStates]:
         node: Node = Node(problem.initState)
 
         if problem.isGoalState(node.state):
@@ -136,11 +143,11 @@ class Solver:
 
             explored.append(node.state)
 
-            nextStates = problem.nextStatesFrom(node.state)
+            nextStates: List[State] = problem.nextStatesFrom(node.state)
             nextStates.reverse()
 
             for nextState in nextStates:
-                newCost = node.cost + 1
+                newCost: Cost = node.cost + 1
 
                 childElem: FrontierElem = Solver.createNewPQElem(
                     nextState, node, newCost
@@ -167,7 +174,7 @@ class Solver:
 
     # TODO: wrong explored at 11, 15?
     @staticmethod
-    def GBFS(problem: Problem):
+    def GBFS(problem: Problem) -> str:
         node: Node = Node(problem.initState)
 
         if problem.isGoalState(node.state):
@@ -212,11 +219,11 @@ class Solver:
                         frontier.remove(frontier[idx])
                         frontier.append(childElem)
 
-        Solver.FailedMessage(explored)
+        return Solver.FailedMessage(explored)
 
     # TODO: debug?
     @staticmethod
-    def AStar(problem: Problem):
+    def AStar(problem: Problem) -> str:
         node: Node = Node(problem.initState)
 
         if problem.isGoalState(node.state):
@@ -245,8 +252,10 @@ class Solver:
                     problem, nextState
                 )
 
-                childElem = Solver.createNewPQElem(nextState, node, newPriority)
-                childNode = childElem[1]
+                childElem: FrontierElem = Solver.createNewPQElem(
+                    nextState, node, newPriority
+                )
+                childNode: Node = childElem[1]
 
                 if childNode.state not in explored and childNode not in [
                     elem[1] for elem in frontier
@@ -261,7 +270,7 @@ class Solver:
                         frontier.remove(frontier[idx])
                         frontier.append(childElem)
 
-        Solver.FailedMessage(explored)
+        return Solver.FailedMessage(explored)
 
     @staticmethod
     def createNewPQElem(
@@ -270,12 +279,12 @@ class Solver:
         return (priority, Node(state, parent, parent.cost + addedCost))
 
     @staticmethod
-    def SuccessMessage(finalNode: Node, explored: ExploredStates) -> None:
+    def SuccessMessage(finalNode: Node, explored: ExploredStates) -> str:
         duration: int = len(explored)
 
-        timeInfo: str = f"Time elapsed:\n\t{duration} minute(s)"
-        exploredInfo: str = f"Explored states:\n\t{explored}"
-        pathInfo: str = "Path:\n"
+        timeInfo: str = f"\tTime elapsed:\n{duration} minute(s)"
+        exploredInfo: str = f"\tExplored states:\n{explored}"
+        pathInfo: str = "\tPath:\n"
 
         path = []
         tmpNode: Optional[Node] = finalNode
@@ -284,25 +293,31 @@ class Solver:
             tmpNode = tmpNode.parent
 
         path.reverse()
-        pathInfo += "\t" + path.__str__()
+        pathInfo += path.__str__()
 
-        print("\n".join([timeInfo, exploredInfo, pathInfo]))
+        return "\n\n".join([timeInfo, exploredInfo, pathInfo, ""])
 
     @staticmethod
-    def FailedMessage(explored: ExploredStates) -> None:
+    def FailedMessage(explored: ExploredStates) -> str:
         duration: int = len(explored)
 
-        timeInfo: str = f"Time elapsed:\n\t{duration} minute(s)"
-        exploredInfo: str = f"Explored states:\n\t{explored}"
+        timeInfo: str = f"\nTime elapsed:\n{duration} minute(s)"
+        exploredInfo: str = f"\nExplored states:\n{explored}"
 
-        print("\n".join(["Failed", timeInfo, exploredInfo]))
+        return "\n\n".join(["Failed", timeInfo, exploredInfo, ""]) 
 
 
 if __name__ == "__main__":
-    Solver.UCS(readInputFromFile("./INPUT/in1.txt"))
-    print("\n")
-    Solver.IDS(readInputFromFile("./INPUT/in1.txt"))
-    print("\n")
-    Solver.GBFS(readInputFromFile("./INPUT/in1.txt"))
-    print("\n")
-    Solver.AStar(readInputFromFile("./INPUT/in1.txt"))
+    problem: Problem = readInputFromFile("./INPUT/input1.txt")
+
+    print("==== UCS ====")
+    print(Solver.UCS(problem))
+
+    print("\n==== IDS ====")
+    print(Solver.IDS(problem))
+
+    print("\n==== GBFS ====")
+    print(Solver.GBFS(problem))
+
+    print("\n==== AStar ====")
+    print(Solver.AStar(problem))
