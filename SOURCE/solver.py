@@ -103,12 +103,67 @@ class Solver:
     # TODO: implement how
     @staticmethod
     def IDS(problem: Problem):
-        pass
+        upperBound: int = problem.size**2
+        # for limit in range(0, upperBound + 1):
+        result: Tuple[Optional[Node], ExploredStates] = Solver.DLS(problem, 22)
+
+        if isinstance(result[0], Node):
+            return Solver.SuccessMessage(result[0], result[1])
+        
+        return Solver.FailedMessage(result[1])
 
     # TODO: use Node.cost for depth
     @staticmethod
-    def DLS(problem: Problem, depthLimit: int = 0):
-        pass
+    def DLS(problem: Problem, depthLimit: int = 0) -> Tuple[Optional[Node], ExploredStates]:
+        node: Node = Node(problem.initState)
+
+        if problem.isGoalState(node.state):
+            return (node, [node.state])
+
+        frontier: Frontier = []
+        explored: ExploredStates = []
+
+        frontierElem: FrontierElem = (0, node)
+
+        frontier.append(frontierElem)
+
+        while frontier:
+            frontierElem = frontier.pop()
+            node = frontierElem[1]
+
+            if node.cost >= depthLimit:
+                continue
+
+            explored.append(node.state)
+
+            nextStates = problem.nextStatesFrom(node.state)
+            nextStates.reverse()
+
+            for nextState in nextStates:
+                newCost = node.cost + 1
+
+                childElem: FrontierElem = Solver.createNewPQElem(
+                    nextState, node, newCost
+                )
+                childNode: Node = childElem[1]
+
+                if problem.isGoalState(childNode.state):
+                    return (childNode, explored)
+
+                if childNode.state not in explored and childNode not in [
+                    elem[1] for elem in frontier
+                ]:
+                    frontier.append(childElem)
+
+                for idx in range(0, len(frontier)):
+                    if (
+                        childNode == frontier[idx][1]
+                        and childElem[0] < frontier[idx][0]
+                    ):
+                        frontier.remove(frontier[idx])
+                        frontier.append(childElem)
+
+        return (None, explored)
 
     # TODO: wrong explored at 11, 15?
     @staticmethod
@@ -245,6 +300,8 @@ class Solver:
 
 if __name__ == "__main__":
     Solver.UCS(readInputFromFile("./INPUT/in1.txt"))
+    print("\n")
+    Solver.IDS(readInputFromFile("./INPUT/in1.txt"))
     print("\n")
     Solver.GBFS(readInputFromFile("./INPUT/in1.txt"))
     print("\n")
