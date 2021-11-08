@@ -56,6 +56,7 @@ def ManhattanHeuristic(problem: Problem, ori: State) -> Heuristic:
     return delX + delY
 
 
+# TODO: check explored states if start == goal
 class Solver:
     @staticmethod
     def UCS(problem: Problem) -> str:
@@ -121,7 +122,7 @@ class Solver:
 
         return Solver.FailedMessage(totalExplored)
 
-    # TODO: use Node.cost for depth
+    # TODO: fix to use TREE search
     @staticmethod
     def DLS(
         problem: Problem, depthLimit: int = 0
@@ -160,9 +161,13 @@ class Solver:
                 if problem.isGoalState(childNode.state):
                     return (childNode, explored)
 
-                if childNode.state not in explored and childNode not in [
-                    elem[1] for elem in frontier
-                ]:
+                tmp: Node = node
+                currentPath: List[State] = []
+                while tmp:
+                    currentPath.append(tmp.state)
+                    tmp = tmp.parent
+
+                if childNode.state not in currentPath:
                     frontier.append(childElem)
 
         return (None, explored)
@@ -303,7 +308,7 @@ class Solver:
 
 
 if __name__ == "__main__":
-    problem: Problem = readInputFromFile("./INPUT/input1.txt")
+    problem: Problem = readInputFromFile("./INPUT/input2.txt")
 
     print("==== UCS ====")
     print(Solver.UCS(problem))
