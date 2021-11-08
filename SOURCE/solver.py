@@ -161,7 +161,7 @@ class Solver:
                 if problem.isGoalState(childNode.state):
                     return (childNode, explored)
 
-                tmp: Node = node
+                tmp: Optional[Node] = node
                 currentPath: List[State] = []
                 while tmp:
                     currentPath.append(tmp.state)
