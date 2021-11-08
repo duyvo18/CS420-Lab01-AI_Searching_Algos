@@ -34,7 +34,7 @@ def readInput(input: ProblemInput) -> Problem:
         for elem in input[idx].split(" "):
             if elem.isnumeric():
                 tmp.append(int(elem))
-            else:
+            elif elem != '':
                 raise ValueError
 
         tmp.sort()
@@ -130,7 +130,7 @@ class Solver:
         node: Node = Node(problem.initState)
 
         if problem.isGoalState(node.state):
-            return (node, [node.state])
+            return (node, [])
 
         frontier: Frontier = []
         explored: ExploredStates = []
@@ -178,7 +178,7 @@ class Solver:
         node: Node = Node(problem.initState)
 
         if problem.isGoalState(node.state):
-            return Solver.SuccessMessage(node, [node.state])
+            return Solver.SuccessMessage(node, [])
 
         frontier: Frontier = []
         explored: ExploredStates = []

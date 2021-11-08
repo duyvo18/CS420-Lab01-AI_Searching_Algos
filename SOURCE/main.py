@@ -3,7 +3,7 @@ from solver import *
 
 # TODO: implement
 if __name__ == "__main__":
-    problem: Problem = readInputFromFile("./INPUT/input2.txt")
+    problem: Problem = readInputFromFile("./INPUT/input3.txt")
 
 
     outputUCS: str= "\n".join(
@@ -44,4 +44,4 @@ if __name__ == "__main__":
         ]
     )
 
-    writeOutputToFile("./OUTPUT/output2.txt", output)
+    writeOutputToFile("./OUTPUT/output3.txt", output)

@@ -1,0 +1,46 @@
+==== UCS ====
+	Time elapsed:
+1 minute(s)
+
+	Explored states:
+[0]
+
+	Path:
+[0]
+
+
+
+==== IDS ====
+	Time elapsed:
+0 minute(s)
+
+	Explored states:
+[]
+
+	Path:
+[0]
+
+
+
+==== GBFS ====
+	Time elapsed:
+0 minute(s)
+
+	Explored states:
+[]
+
+	Path:
+[0]
+
+
+
+==== AStar ====
+	Time elapsed:
+1 minute(s)
+
+	Explored states:
+[0]
+
+	Path:
+[0]
+
