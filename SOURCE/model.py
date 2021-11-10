@@ -2,7 +2,6 @@ from typing import Tuple, List
 
 
 State = int
-Coordinate = Tuple[int, int]
 
 Cost = int
 Heuristic = int

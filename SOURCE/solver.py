@@ -3,67 +3,13 @@ from typing import List, Optional
 from model import *
 
 
-def readInputFromFile(fileDir: str) -> Problem:
-    with open(fileDir) as file:
-        return readInput(file.read().splitlines())
-
-
-def writeOutputToFile(fileDir: str, output: str) -> None:
-    with open(fileDir, mode="w") as file:
-        file.write(output)
-
-
-def readInput(input: ProblemInput) -> Problem:
-    size: int = int()
-    goalState: State = int()
-    adjMatrix: AdjMatrix = list()
-
-    if input[0].isnumeric():
-        size = int(input[0])
-    else:
-        raise ValueError
-
-    if input[len(input) - 1].isnumeric():
-        goalState = int(input[len(input) - 1])
-    else:
-        raise ValueError
-
-    for idx in range(1, len(input) - 1):
-        tmp: List[int] = list()
-
-        for elem in input[idx].split(" "):
-            if elem.isnumeric():
-                tmp.append(int(elem))
-            elif elem != '':
-                raise ValueError
-
-        tmp.sort()
-        adjMatrix.append(tmp)
-
-    return Problem(size, adjMatrix, goalState)
-
-
-def ManhattanHeuristic(problem: Problem, ori: State) -> Heuristic:
-    des: State = problem.goalState
-    size: int = problem.size
-
-    if ori >= size * size or des >= size * size:
-        raise IndexError
-
-    delX: Heuristic = abs(des // size - ori // size)
-    delY: Heuristic = abs(des % size - ori % size)
-
-    return delX + delY
-
-
-# TODO: check explored states if start == goal
 class Solver:
     @staticmethod
     def UCS(problem: Problem) -> str:
         node: Node = Node(problem.initState)
 
         if problem.isGoalState(node.state):
-            return Solver.SuccessMessage(node, [node.state])
+            return Solver.successMessage(node, [node.state])
 
         frontier: Frontier = []
         explored: ExploredStates = []
@@ -81,7 +27,7 @@ class Solver:
             explored.append(node.state)
 
             if problem.isGoalState(node.state):
-                return Solver.SuccessMessage(node, explored)
+                return Solver.successMessage(node, explored)
 
             for nextState in problem.nextStatesFrom(node.state):
                 newPriority: Priority = frontierElem[0] + 1
@@ -104,9 +50,8 @@ class Solver:
                         frontier.remove(frontier[idx])
                         frontier.append(childElem)
 
-        return Solver.FailedMessage(explored)
+        return Solver.failedMessage(explored)
 
-    # TODO: implement how
     @staticmethod
     def IDS(problem: Problem) -> str:
         upperBound: int = problem.size ** 2
@@ -118,11 +63,10 @@ class Solver:
             totalExplored.extend(result[1])
 
             if isinstance(result[0], Node):
-                return Solver.SuccessMessage(result[0], totalExplored)
+                return Solver.successMessage(result[0], totalExplored)
 
-        return Solver.FailedMessage(totalExplored)
+        return Solver.failedMessage(totalExplored)
 
-    # TODO: fix to use TREE search
     @staticmethod
     def DLS(
         problem: Problem, depthLimit: int = 0
@@ -172,13 +116,12 @@ class Solver:
 
         return (None, explored)
 
-    # TODO: wrong explored at 11, 15?
     @staticmethod
     def GBFS(problem: Problem) -> str:
         node: Node = Node(problem.initState)
 
         if problem.isGoalState(node.state):
-            return Solver.SuccessMessage(node, [])
+            return Solver.successMessage(node, [])
 
         frontier: Frontier = []
         explored: ExploredStates = []
@@ -204,7 +147,7 @@ class Solver:
                 childNode: Node = childElem[1]
 
                 if problem.isGoalState(childNode.state):
-                    return Solver.SuccessMessage(childNode, explored)
+                    return Solver.successMessage(childNode, explored)
 
                 if childNode.state not in explored and childNode not in [
                     elem[1] for elem in frontier
@@ -219,15 +162,14 @@ class Solver:
                         frontier.remove(frontier[idx])
                         frontier.append(childElem)
 
-        return Solver.FailedMessage(explored)
+        return Solver.failedMessage(explored)
 
-    # TODO: debug?
     @staticmethod
     def AStar(problem: Problem) -> str:
         node: Node = Node(problem.initState)
 
         if problem.isGoalState(node.state):
-            return Solver.SuccessMessage(node, [node.state])
+            return Solver.successMessage(node, [node.state])
 
         frontier: Frontier = []
         explored: ExploredStates = []
@@ -245,7 +187,7 @@ class Solver:
             explored.append(node.state)
 
             if problem.isGoalState(node.state):
-                return Solver.SuccessMessage(node, explored)
+                return Solver.successMessage(node, explored)
 
             for nextState in problem.nextStatesFrom(node.state):
                 newPriority: Priority = node.cost + ManhattanHeuristic(
@@ -270,7 +212,7 @@ class Solver:
                         frontier.remove(frontier[idx])
                         frontier.append(childElem)
 
-        return Solver.FailedMessage(explored)
+        return Solver.failedMessage(explored)
 
     @staticmethod
     def createNewPQElem(
@@ -279,7 +221,7 @@ class Solver:
         return (priority, Node(state, parent, parent.cost + addedCost))
 
     @staticmethod
-    def SuccessMessage(finalNode: Node, explored: ExploredStates) -> str:
+    def successMessage(finalNode: Node, explored: ExploredStates) -> str:
         duration: int = len(explored)
 
         timeInfo: str = f"\tTime elapsed:\n{duration} minute(s)"
@@ -298,7 +240,7 @@ class Solver:
         return "\n\n".join([timeInfo, exploredInfo, pathInfo, ""])
 
     @staticmethod
-    def FailedMessage(explored: ExploredStates) -> str:
+    def failedMessage(explored: ExploredStates) -> str:
         duration: int = len(explored)
 
         timeInfo: str = f"\nTime elapsed:\n{duration} minute(s)"
@@ -307,8 +249,61 @@ class Solver:
         return "\n\n".join(["Failed", timeInfo, exploredInfo, ""])
 
 
+def ManhattanHeuristic(problem: Problem, ori: State) -> Heuristic:
+    des: State = problem.goalState
+    size: int = problem.size
+
+    if ori >= size * size or des >= size * size:
+        raise IndexError
+
+    delX: Heuristic = abs(des // size - ori // size)
+    delY: Heuristic = abs(des % size - ori % size)
+
+    return delX + delY
+
+
+def readInput(input: ProblemInput) -> Problem:
+    size: int = int()
+    goalState: State = int()
+    adjMatrix: AdjMatrix = list()
+
+    if input[0].isnumeric():
+        size = int(input[0])
+    else:
+        raise ValueError
+
+    if input[len(input) - 1].isnumeric():
+        goalState = int(input[len(input) - 1])
+    else:
+        raise ValueError
+
+    for idx in range(1, len(input) - 1):
+        tmp: List[int] = list()
+
+        for elem in input[idx].split(" "):
+            if elem.isnumeric():
+                tmp.append(int(elem))
+            elif elem != "":
+                raise ValueError
+
+        tmp.sort()
+        adjMatrix.append(tmp)
+
+    return Problem(size, adjMatrix, goalState)
+
+
+def readInputFromFile(fileDir: str) -> Problem:
+    with open(fileDir) as file:
+        return readInput(file.read().splitlines())
+
+
+def writeOutputToFile(fileDir: str, output: str) -> None:
+    with open(fileDir, mode="w") as file:
+        file.write(output)
+
+
 if __name__ == "__main__":
-    problem: Problem = readInputFromFile("./INPUT/input2.txt")
+    problem: Problem = readInputFromFile("./INPUT/input3.txt")
 
     print("==== UCS ====")
     print(Solver.UCS(problem))
