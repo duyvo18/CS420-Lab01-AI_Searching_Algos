@@ -3,8 +3,10 @@ from solver import *
 
 # TODO: implement
 if __name__ == "__main__":
-    inputFile: str = "./INPUT/input2.txt"
-    outputFile: str = "./OUTPUT/output2.txt"
+    mazeNo: int = 4
+
+    inputFile: str = f"./INPUT/input{mazeNo}.txt"
+    outputFile: str = f"./OUTPUT/output{mazeNo}.txt"
     
     problem: Problem = readInputFromFile(inputFile)
 

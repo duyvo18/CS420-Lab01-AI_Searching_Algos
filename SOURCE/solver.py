@@ -303,7 +303,9 @@ def writeOutputToFile(fileDir: str, output: str) -> None:
 
 
 if __name__ == "__main__":
-    problem: Problem = readInputFromFile("./INPUT/input3.txt")
+    mazeNo: int = 5
+
+    problem: Problem = readInputFromFile(f"./INPUT/input{mazeNo}.txt")
 
     print("==== UCS ====")
     print(Solver.UCS(problem))

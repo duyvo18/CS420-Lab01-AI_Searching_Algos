@@ -1,0 +1,46 @@
+==== UCS ====
+	Time elapsed:
+11 minute(s)
+
+	Explored states:
+[0, 1, 2, 5, 3, 4, 9, 7, 8, 11, 12]
+
+	Path:
+[0, 1, 5, 4, 8, 12]
+
+
+
+==== IDS ====
+	Time elapsed:
+22 minute(s)
+
+	Explored states:
+[0, 0, 1, 0, 1, 2, 5, 0, 1, 2, 3, 5, 4, 9, 0, 1, 2, 3, 7, 5, 4, 8]
+
+	Path:
+[0, 1, 5, 4, 8, 12]
+
+
+
+==== GBFS ====
+	Time elapsed:
+5 minute(s)
+
+	Explored states:
+[0, 1, 5, 4, 8]
+
+	Path:
+[0, 1, 5, 4, 8, 12]
+
+
+
+==== AStar ====
+	Time elapsed:
+7 minute(s)
+
+	Explored states:
+[0, 1, 5, 4, 8, 9, 12]
+
+	Path:
+[0, 1, 5, 4, 8, 12]
+
